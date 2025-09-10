@@ -8,10 +8,19 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        
+        /* Define Cavaliers' color palette */
+        :root {
+            --cavs-wine: #6F263D;
+            --cavs-gold: #FFC72C;
+            --cavs-black: #000000;
+            --cavs-white: #FFFFFF;
+        }
+
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f3f4f6;
-            color: #1f2937;
+            background-color: var(--cavs-white);
+            color: var(--cavs-black);
         }
         .container {
             max-width: 1280px;
@@ -21,12 +30,12 @@
         .section-header {
             font-size: 2.25rem;
             font-weight: 700;
-            color: #1f2937;
+            color: var(--cavs-wine);
             margin-bottom: 1.5rem;
             text-align: center;
         }
         .card {
-            background-color: #ffffff;
+            background-color: #f8f8f8; /* A very light gray to differentiate from the background */
             border-radius: 1rem;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             padding: 2rem;
@@ -36,13 +45,11 @@
 <body class="bg-gray-100 text-gray-800">
 
     <div class="container">
-        <!-- Header -->
         <header class="text-center py-12">
-            <h1 class="text-5xl font-bold text-gray-900">Creating Advantages</h1>
+            <h1 class="text-5xl font-bold" style="color: var(--cavs-wine);">Creating Advantages</h1>
             <p class="mt-4 text-xl text-gray-600">Visualizing how NBA players create points by generating advantages.</p>
         </header>
 
-        <!-- Infographic Section -->
         <section class="mb-16">
             <div class="card">
                 <h2 class="section-header">How to Quantify It</h2>
@@ -51,46 +58,44 @@
                 </p>
 
                 <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mt-8">
-
-                    <div class="p-6 bg-gray-50 rounded-lg shadow-inner">
-                        <h3 class="text-xl font-semibold mb-2 text-blue-600">Self-Creation</h3>
+                    <div class="p-6 bg-gray-50 rounded-lg shadow-inner" style="background-color: var(--cavs-wine); color: var(--cavs-white);">
+                        <h3 class="text-xl font-semibold mb-2" style="color: var(--cavs-gold);">Self-Creation</h3>
                         <p class="text-sm">Points a player scores through their own actions, such as one-on-one moves or off-the-dribble shots, without an immediate assist. Only includes self-creation that leads to high quality shots.</p>
                     </div>
-                    <div class="p-6 bg-gray-50 rounded-lg shadow-inner">
-                        <h3 class="text-xl font-semibold mb-2 text-blue-600">Create for Others</h3>
+                    <div class="p-6 bg-gray-50 rounded-lg shadow-inner" style="background-color: var(--cavs-wine); color: var(--cavs-white);">
+                        <h3 class="text-xl font-semibold mb-2" style="color: var(--cavs-gold);">Create for Others</h3>
                         <p class="text-sm">Points generated from a player's passes that lead to a teammate's score, essentially quantifying their playmaking impact. Only includes potential assists that lead to high quality shots.</p>
                     </div>
-                    <div class="p-6 bg-gray-50 rounded-lg shadow-inner">
-                        <h3 class="text-xl font-semibold mb-2 text-blue-600">Basket Cuts</h3>
+                    <div class="p-6 bg-gray-50 rounded-lg shadow-inner" style="background-color: var(--cavs-wine); color: var(--cavs-white);">
+                        <h3 class="text-xl font-semibold mb-2" style="color: var(--cavs-gold);">Basket Cuts</h3>
                         <p class="text-sm">Points created when a player makes a timely cut to the basket, catching the defense off-guard for a high-percentage score.</p>
                     </div>
-                    <div class="p-6 bg-gray-50 rounded-lg shadow-inner">
-                        <h3 class="text-xl font-semibold mb-2 text-blue-600">Movement Shooting</h3>
+                    <div class="p-6 bg-gray-50 rounded-lg shadow-inner" style="background-color: var(--cavs-wine); color: var(--cavs-white);">
+                        <h3 class="text-xl font-semibold mb-2" style="color: var(--cavs-gold);">Movement Shooting</h3>
                         <p class="text-sm">Points from shots a player takes while moving, such as coming off screens or running in transition, leveraging their off-ball movement.</p>
                     </div>
-                    <div class="p-6 bg-gray-50 rounded-lg shadow-inner">
-                        <h3 class="text-xl font-semibold mb-2 text-blue-600">Offensive Rebounds</h3>
+                    <div class="p-6 bg-gray-50 rounded-lg shadow-inner" style="background-color: var(--cavs-wine); color: var(--cavs-white);">
+                        <h3 class="text-xl font-semibold mb-2" style="color: var(--cavs-gold);">Offensive Rebounds</h3>
                         <p class="text-sm">Points created by a player after securing an offensive rebound.</p>
                     </div>
-                    <div class="p-6 bg-gray-50 rounded-lg shadow-inner">
-                        <h3 class="text-xl font-semibold mb-2 text-blue-600">Ball Control</h3>
+                    <div class="p-6 bg-gray-50 rounded-lg shadow-inner" style="background-color: var(--cavs-wine); color: var(--cavs-white);">
+                        <h3 class="text-xl font-semibold mb-2" style="color: var(--cavs-gold);">Ball Control</h3>
                         <p class="text-sm">Points saved/lost by turnovers.</p>
                     </div>
-                    <div class="p-6 bg-gray-50 rounded-lg shadow-inner">
-                        <h3 class="text-xl font-semibold mb-2 text-blue-600">Drawing Doubles</h3>
+                    <div class="p-6 bg-gray-50 rounded-lg shadow-inner" style="background-color: var(--cavs-wine); color: var(--cavs-white);">
+                        <h3 class="text-xl font-semibold mb-2" style="color: var(--cavs-gold);">Drawing Doubles</h3>
                         <p class="text-sm">Points generated when a player's presence attracts a second defender, leaving a teammate open for a scoring play.</p>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- Interactive Tool Section -->
         <section class="mb-16">
             <div class="card">
                 <h2 class="section-header">How Do Individual Players Create Advantages?</h2>
                 <div class="flex flex-col items-center mb-8">
                     <label for="player-select" class="text-lg font-medium mb-2">Select a Player:</label>
-                    <select id="player-select" class="w-full md:w-64 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 ease-in-out">
+                    <select id="player-select" class="w-full md:w-64 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2" style="border-color: var(--cavs-wine); focus-ring-color: var(--cavs-gold);">
                         <option value="">-- Choose a Player --</option>
                     </select>
                 </div>
@@ -100,10 +105,6 @@
             </div>
         </section>
 
-        <!-- Footer -->
-        <footer class="text-center py-6 text-gray-500 text-sm">
-            <p>&copy; 2024 NBA Data Infographic. All rights reserved.</p>
-        </footer>
     </div>
 
     <script>
@@ -162,10 +163,15 @@
                         label: 'Advantage Points Created',
                         data: [],
                         backgroundColor: [
-                            '#10b981', '#ef4444', '#f59e0b',
-                            '#8b5cf6', '#60a5fa', '#06b6d4', '#f97316'
+                            '#FFC72C', // True Gold
+                            '#6F263D', // Wine
+                            '#FFC72C', // True Gold
+                            '#6F263D', // Wine
+                            '#FFC72C', // True Gold
+                            '#6F263D', // Wine
+                            '#FFC72C'  // True Gold
                         ],
-                        borderColor: '#374151',
+                        borderColor: '#000000', // Black
                         borderWidth: 1,
                         borderRadius: 6,
                         barPercentage: 0.8,
@@ -180,15 +186,22 @@
                             beginAtZero: true,
                             title: {
                                 display: true,
-                                text: 'Points Created'
+                                text: 'Points Created',
+                                color: '#000000'
                             },
                             grid: {
-                                color: 'rgba(209, 213, 219, 0.4)'
+                                color: 'rgba(0, 0, 0, 0.1)'
+                            },
+                            ticks: {
+                                color: '#000000'
                             }
                         },
                         x: {
-                             grid: {
-                                color: 'rgba(209, 213, 219, 0.4)'
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.1)'
+                            },
+                            ticks: {
+                                color: '#000000'
                             }
                         }
                     },
@@ -202,7 +215,8 @@
                             font: {
                                 size: 18,
                                 weight: 'bold'
-                            }
+                            },
+                            color: '#000000'
                         },
                         tooltip: {
                             callbacks: {
