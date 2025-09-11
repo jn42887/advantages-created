@@ -1,767 +1,849 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
- <meta charset="UTF-8">
- <meta name="viewport" content="width=device-width, initial-scale=1.0">
- <title>Creating Advantages</title>
- <script src="https://cdn.tailwindcss.com"></script>
- <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
- <style>
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
- 
-  /* Define Cavaliers' color palette */
-  :root {
-   --cavs-wine: #6F263D;
-   --cavs-gold: #FFC72C;
-   --cavs-black: #000000;
-   --cavs-white: #FFFFFF;
-  }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Creating Advantages</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+    
+    /* Define Cavaliers' color palette */
+    :root {
+      --cavs-wine: #6F263D;
+      --cavs-gold: #FFC72C;
+      --cavs-black: #000000;
+      --cavs-white: #FFFFFF;
+    }
 
-  body {
-   font-family: 'Inter', sans-serif;
-   background-color: var(--cavs-white);
-   color: var(--cavs-black);
-  }
-  .container {
-   max-width: 1280px;
-   margin: 0 auto;
-   padding: 2rem;
-  }
-  .section-header {
-   font-size: 2.25rem;
-   font-weight: 700;
-   color: var(--cavs-wine);
-   margin-bottom: 1.5rem;
-   text-align: center;
-  }
-  .card {
-   background-color: #f8f8f8; /* A very light gray to differentiate from the background */
-   border-radius: 1rem;
-   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-   padding: 2rem;
-  }
-  .rank-high {
-   color: green;
-   font-weight: bold;
-  }
-  .rank-low {
-   color: red;
-   font-weight: bold;
-  }
-  .team-table {
-   width: 100%;
-   border-collapse: collapse;
-   margin-top: 1rem;
-   font-size: 0.8rem;
-  }
-  .team-table th, .team-table td {
-   border: 1px solid #ccc;
-   padding: 8px;
-   text-align: center;
-  }
-  .team-table th {
-   background-color: var(--cavs-wine);
-   color: var(--cavs-white);
-   font-weight: 600;
-   position: sticky;
-   top: 0;
-   z-index: 10;
-   cursor: pointer;
-   user-select: none;
-  }
-  .team-table th:hover {
-   background-color: #5a1d2e;
-  }
-  .team-table tbody tr:nth-child(even) {
-   background-color: #f1f1f1;
-  }
-  .team-table tbody tr:hover {
-   background-color: #e0e0e0;
-  }
-  .team-table th.sortable::after {
-   content: '';
-   display: inline-block;
-   margin-left: 8px;
-   vertical-align: middle;
-  }
-  .team-table th.sortable.asc::after {
-   content: '▲';
-  }
-  .team-table th.sortable.desc::after {
-   content: '▼';
-  }
- </style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: var(--cavs-white);
+      color: var(--cavs-black);
+    }
+    .container {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+    .section-header {
+      font-size: 2.25rem;
+      font-weight: 700;
+      color: var(--cavs-wine);
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+    .card {
+      background-color: #f8f8f8; /* A very light gray to differentiate from the background */
+      border-radius: 1rem;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      padding: 2rem;
+    }
+    .rank-high {
+      color: green;
+      font-weight: bold;
+    }
+    .rank-low {
+      color: red;
+      font-weight: bold;
+    }
+    .team-table, .player-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+      font-size: 0.8rem;
+    }
+    .team-table th, .team-table td, .player-table th, .player-table td {
+      border: 1px solid #ccc;
+      padding: 8px;
+      text-align: center;
+    }
+    .team-table th, .player-table th {
+      background-color: var(--cavs-wine);
+      color: var(--cavs-white);
+      font-weight: 600;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      cursor: pointer;
+      user-select: none;
+    }
+    .team-table th:hover, .player-table th:hover {
+      background-color: #5a1d2e;
+    }
+    .team-table tbody tr:nth-child(even), .player-table tbody tr:nth-child(even) {
+      background-color: #f1f1f1;
+    }
+    .team-table tbody tr:hover, .player-table tbody tr:hover {
+      background-color: #e0e0e0;
+    }
+    .team-table th.sortable::after, .player-table th.sortable::after {
+      content: '';
+      display: inline-block;
+      margin-left: 8px;
+      vertical-align: middle;
+    }
+    .team-table th.sortable.asc::after, .player-table th.sortable.asc::after {
+      content: '▲';
+    }
+    .team-table th.sortable.desc::after, .player-table th.sortable.desc::after {
+      content: '▼';
+    }
+  </style>
 </head>
 <body class="bg-gray-100 text-gray-800">
 
- <div class="container">
-  <header class="text-center py-12">
-   <h1 class="text-5xl font-bold" style="color: var(--cavs-wine);">How Do Players Create and Prevent Advantages?</h1>
-  </header>
+  <div class="container">
+    <header class="text-center py-12">
+      <h1 class="text-5xl font-bold" style="color: var(--cavs-wine);">How Do Players Create and Prevent Advantages?</h1>
+    </header>
 
-  <section class="mb-16">
-   <div class="card">
-    <h2 class="section-header">How to Quantify It</h2>
-    <p class="text-lg text-center mb-8">
-     The following metrics represent different ways players create or prevent advantages. "Overall PTS Created" is the sum of everything, quantifying a player's full two-way value.
-    </p>
+    <section class="mb-16">
+      <div class="card">
+        <h2 class="section-header">How to Quantify It</h2>
+        <p class="text-lg text-center mb-8">
+          The following metrics represent different ways players create or prevent advantages. "Overall PTS Created" is the sum of everything, quantifying a player's full two-way value.
+        </p>
 
-    <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mt-8">
-     <div class="p-6 bg-gray-50 rounded-lg shadow-inner" style="background-color: var(--cavs-wine); color: var(--cavs-white);">
-      <h3 class="text-xl font-semibold mb-2" style="color: var(--cavs-gold);">Self-Creation</h3>
-      <p class="text-sm">Points a player scores through their own actions, such as one-on-one moves or off-the-dribble shots, without an immediate assist. Only includes self-creation that leads to high quality shots.</p>
-     </div>
-     <div class="p-6 bg-gray-50 rounded-lg shadow-inner" style="background-color: var(--cavs-wine); color: var(--cavs-white);">
-      <h3 class="text-xl font-semibold mb-2" style="color: var(--cavs-gold);">Create for Others</h3>
-      <p class="text-sm">Points generated from a player's passes that lead to a teammate's score, essentially quantifying their playmaking impact. Only includes potential assists that lead to high quality shots.</p>
-     </div>
-     <div class="p-6 bg-gray-50 rounded-lg shadow-inner" style="background-color: var(--cavs-wine); color: var(--cavs-white);">
-      <h3 class="text-xl font-semibold mb-2" style="color: var(--cavs-gold);">Basket Cuts</h3>
-      <p class="text-sm">Points created when a player makes a timely cut to the basket, catching the defense off-guard for a high-percentage score.</p>
-     </div>
-     <div class="p-6 bg-gray-50 rounded-lg shadow-inner" style="background-color: var(--cavs-wine); color: var(--cavs-white);">
-      <h3 class="text-xl font-semibold mb-2" style="color: var(--cavs-gold);">Movement Shooting</h3>
-      <p class="text-sm">Points from shots a player takes while moving, such as coming off screens or running in transition, leveraging their off-ball movement.</p>
-     </div>
-     <div class="p-6 bg-gray-50 rounded-lg shadow-inner" style="background-color: var(--cavs-wine); color: var(--cavs-white);">
-      <h3 class="text-xl font-semibold mb-2" style="color: var(--cavs-gold);">Offensive Rebounds</h3>
-      <p class="text-sm">Points created by a player after securing an offensive rebound.</p>
-     </div>
-     <div class="p-6 bg-gray-50 rounded-lg shadow-inner" style="background-color: var(--cavs-wine); color: var(--cavs-white);">
-      <h3 class="text-xl font-semibold mb-2" style="color: var(--cavs-gold);">Ball Control</h3>
-      <p class="text-sm">Points saved/lost by turnovers.</p>
-     </div>
-     <div class="p-6 bg-gray-50 rounded-lg shadow-inner" style="background-color: var(--cavs-wine); color: var(--cavs-white);">
-      <h3 class="text-xl font-semibold mb-2" style="color: var(--cavs-gold);">Drawing Doubles</h3>
-      <p class="text-sm">Points generated when a player's presence attracts a second defender, leaving a teammate open for a scoring play.</p>
-     </div>
-     <div class="p-6 bg-gray-50 rounded-lg shadow-inner" style="background-color: var(--cavs-black); color: var(--cavs-white);">
-      <h3 class="text-xl font-semibold mb-2" style="color: var(--cavs-gold);">Defensive PTS Saved</h3>
-      <p class="text-sm">Points a player saves on the defensive end. This includes things like contesting shots, forcing turnovers, and preventing points in transition.</p>
-     </div>
-     <div class="p-6 bg-gray-50 rounded-lg shadow-inner" style="background-color: var(--cavs-black); color: var(--cavs-white);">
-      <h3 class="text-xl font-semibold mb-2" style="color: var(--cavs-gold);">Overall PTS Created</h3>
-      <p class="text-sm">The sum of a player's offensive 'Advantage PTS Created' and their 'Defensive PTS Saved' to provide a single number for their two-way impact.</p>
-     </div>
-    </div>
-   </div>
-  </section>
+        <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mt-8">
+          <div class="p-6 bg-gray-50 rounded-lg shadow-inner" style="background-color: var(--cavs-wine); color: var(--cavs-white);">
+            <h3 class="text-xl font-semibold mb-2" style="color: var(--cavs-gold);">Self-Creation</h3>
+            <p class="text-sm">Points a player scores through their own actions, such as one-on-one moves or off-the-dribble shots, without an immediate assist. Only includes self-creation that leads to high quality shots.</p>
+          </div>
+          <div class="p-6 bg-gray-50 rounded-lg shadow-inner" style="background-color: var(--cavs-wine); color: var(--cavs-white);">
+            <h3 class="text-xl font-semibold mb-2" style="color: var(--cavs-gold);">Create for Others</h3>
+            <p class="text-sm">Points generated from a player's passes that lead to a teammate's score, essentially quantifying their playmaking impact. Only includes potential assists that lead to high quality shots.</p>
+          </div>
+          <div class="p-6 bg-gray-50 rounded-lg shadow-inner" style="background-color: var(--cavs-wine); color: var(--cavs-white);">
+            <h3 class="text-xl font-semibold mb-2" style="color: var(--cavs-gold);">Basket Cuts</h3>
+            <p class="text-sm">Points created when a player makes a timely cut to the basket, catching the defense off-guard for a high-percentage score.</p>
+          </div>
+          <div class="p-6 bg-gray-50 rounded-lg shadow-inner" style="background-color: var(--cavs-wine); color: var(--cavs-white);">
+            <h3 class="text-xl font-semibold mb-2" style="color: var(--cavs-gold);">Movement Shooting</h3>
+            <p class="text-sm">Points from shots a player takes while moving, such as coming off screens or running in transition, leveraging their off-ball movement.</p>
+          </div>
+          <div class="p-6 bg-gray-50 rounded-lg shadow-inner" style="background-color: var(--cavs-wine); color: var(--cavs-white);">
+            <h3 class="text-xl font-semibold mb-2" style="color: var(--cavs-gold);">Offensive Rebounds</h3>
+            <p class="text-sm">Points created by a player after securing an offensive rebound.</p>
+          </div>
+          <div class="p-6 bg-gray-50 rounded-lg shadow-inner" style="background-color: var(--cavs-wine); color: var(--cavs-white);">
+            <h3 class="text-xl font-semibold mb-2" style="color: var(--cavs-gold);">Ball Control</h3>
+            <p class="text-sm">Points saved/lost by turnovers.</p>
+          </div>
+          <div class="p-6 bg-gray-50 rounded-lg shadow-inner" style="background-color: var(--cavs-wine); color: var(--cavs-white);">
+            <h3 class="text-xl font-semibold mb-2" style="color: var(--cavs-gold);">Drawing Doubles</h3>
+            <p class="text-sm">Points generated when a player's presence attracts a second defender, leaving a teammate open for a scoring play.</p>
+          </div>
+          <div class="p-6 bg-gray-50 rounded-lg shadow-inner" style="background-color: var(--cavs-black); color: var(--cavs-white);">
+            <h3 class="text-xl font-semibold mb-2" style="color: var(--cavs-gold);">Defensive PTS Saved</h3>
+            <p class="text-sm">Points a player saves on the defensive end. This includes things like contesting shots, forcing turnovers, and preventing points in transition.</p>
+          </div>
+          <div class="p-6 bg-gray-50 rounded-lg shadow-inner" style="background-color: var(--cavs-black); color: var(--cavs-white);">
+            <h3 class="text-xl font-semibold mb-2" style="color: var(--cavs-gold);">Overall PTS Created</h3>
+            <p class="text-sm">The sum of a player's offensive 'Advantage PTS Created' and their 'Defensive PTS Saved' to provide a single number for their two-way impact.</p>
+          </div>
+        </div>
+      </div>
+    </section>
 
-  <section class="mb-16">
-   <div class="card">
-    <h2 class="section-header">Individual Breakdown</h2>
-    <div class="flex flex-col md:flex-row justify-center items-center gap-4 mb-8">
-     <div>
-      <label for="team-select" class="text-lg font-medium mb-2">Select a Team:</label>
-      <select id="team-select" class="w-full md:w-48 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2" style="border-color: var(--cavs-wine); focus-ring-color: var(--cavs-gold);">
-       <option value="">-- All Teams --</option>
-      </select>
-     </div>
-     <div>
-      <label for="player-select" class="text-lg font-medium mb-2">Select a Player:</label>
-      <select id="player-select" class="w-full md:w-48 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2" style="border-color: var(--cavs-wine); focus-ring-color: var(--cavs-gold);">
-       <option value="">-- Choose a Player --</option>
-      </select>
-     </div>
-    </div>
-    <div class="h-96 md:h-[500px] w-full">
-     <canvas id="player-chart"></canvas>
-    </div>
-   </div>
-  </section>
+    <section class="mb-16">
+      <div class="card">
+        <h2 class="section-header">Individual Breakdown</h2>
+        <div class="flex flex-col md:flex-row justify-center items-center gap-4 mb-8">
+          <div>
+            <label for="team-select" class="text-lg font-medium mb-2">Select a Team:</label>
+            <select id="team-select" class="w-full md:w-48 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2" style="border-color: var(--cavs-wine); focus-ring-color: var(--cavs-gold);">
+              <option value="">-- All Teams --</option>
+            </select>
+          </div>
+          <div>
+            <label for="player-select" class="text-lg font-medium mb-2">Select a Player:</label>
+            <select id="player-select" class="w-full md:w-48 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2" style="border-color: var(--cavs-wine); focus-ring-color: var(--cavs-gold);">
+              <option value="">-- Choose a Player --</option>
+            </select>
+          </div>
+        </div>
+        <div class="h-96 md:h-[500px] w-full">
+          <canvas id="player-chart"></canvas>
+        </div>
+      </div>
+    </section>
 
-  <section class="mb-16">
-   <div class="card">
-    <h2 class="section-header">Player Comparison Tool</h2>
-    <div class="flex flex-col md:flex-row justify-center items-center gap-4 mb-8">
-     <div>
-      <label for="player-1-select" class="text-lg font-medium mb-2">Select Player 1:</label>
-      <select id="player-1-select" class="w-full md:w-48 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2" style="border-color: var(--cavs-wine); focus-ring-color: var(--cavs-gold);">
-       <option value="">-- Choose a Player --</option>
-      </select>
-     </div>
-     <div>
-      <label for="player-2-select" class="text-lg font-medium mb-2">Select Player 2:</label>
-      <select id="player-2-select" class="w-full md:w-48 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2" style="border-color: var(--cavs-wine); focus-ring-color: var(--cavs-gold);">
-       <option value="">-- Choose a Player --</option>
-      </select>
-     </div>
-    </div>
-    <div class="h-96 md:h-[500px] w-full">
-     <canvas id="comparison-chart"></canvas>
-    </div>
-   </div>
-  </section>
+    <section class="mb-16">
+      <div class="card">
+        <h2 class="section-header">Player Comparison Tool</h2>
+        <div class="flex flex-col md:flex-row justify-center items-center gap-4 mb-8">
+          <div>
+            <label for="player-1-select" class="text-lg font-medium mb-2">Select Player 1:</label>
+            <select id="player-1-select" class="w-full md:w-48 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2" style="border-color: var(--cavs-wine); focus-ring-color: var(--cavs-gold);">
+              <option value="">-- Choose a Player --</option>
+            </select>
+          </div>
+          <div>
+            <label for="player-2-select" class="text-lg font-medium mb-2">Select Player 2:</label>
+            <select id="player-2-select" class="w-full md:w-48 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2" style="border-color: var(--cavs-wine); focus-ring-color: var(--cavs-gold);">
+              <option value="">-- Choose a Player --</option>
+            </select>
+          </div>
+        </div>
+        <div class="h-96 md:h-[500px] w-full">
+          <canvas id="comparison-chart"></canvas>
+        </div>
+      </div>
+    </section>
 
-  <section class="mb-16">
-   <div class="card">
-    <h2 class="section-header">Players by Team</h2>
-    <div class="flex flex-col md:flex-row justify-center items-center gap-4 mb-8">
-     <label for="team-player-select" class="text-lg font-medium">Select a Team:</label>
-     <select id="team-player-select" class="w-full md:w-48 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2" style="border-color: var(--cavs-wine); focus-ring-color: var(--cavs-gold);">
-      <option value="">-- Select a Team --</option>
-     </select>
-    </div>
-    <div id="player-list-container" class="mt-8">
-     <p class="text-center text-gray-500">Please select a team to see the player list.</p>
-    </div>
-   </div>
-  </section>
- 
-  <section>
-   <div class="card">
-    <h2 class="section-header">Team Advantages Metrics & Ranks</h2>
-    <div id="team-table-container" class="overflow-x-auto">
-     </div>
-   </div>
-  </section>
+    <section class="mb-16">
+      <div class="card">
+        <h2 class="section-header">Players by Team</h2>
+        <div class="flex flex-col md:flex-row justify-center items-center gap-4 mb-8">
+          <label for="team-player-select" class="text-lg font-medium">Select a Team:</label>
+          <select id="team-player-select" class="w-full md:w-48 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2" style="border-color: var(--cavs-wine); focus-ring-color: var(--cavs-gold);">
+            <option value="">-- Select a Team --</option>
+          </select>
+        </div>
+        <div id="player-list-container" class="mt-8">
+          <p class="text-center text-gray-500">Please select a team to see the player list.</p>
+        </div>
+      </div>
+    </section>
+    
+    <section class="mb-16">
+      <div class="card">
+        <h2 class="section-header">Team Advantages Metrics & Ranks</h2>
+        <div id="team-table-container" class="overflow-x-auto">
+        </div>
+      </div>
+    </section>
 
- </div>
+    <section>
+      <div class="card">
+        <h2 class="section-header">All Players Advantages Metrics</h2>
+        <div id="all-players-table-container" class="overflow-x-auto">
+        </div>
+      </div>
+    </section>
 
- <script>
-  let playerChart = null;
-  let comparisonChart = null;
-  let allPlayerData = []; // Store the full dataset
-  let teamData = []; // Store the team data
-  let currentSortColumn = 'PTS Created';
-  let currentSortDirection = 'desc';
-  
-  const csvFilePath = 'Advantages Created.csv';
-  const teamCsvFilePath = 'Team Advantages Created.csv';
+  </div>
 
-  // Function to parse the CSV data
-  function parseCSV(csv) {
-   const lines = csv.trim().split('\n');
-   const headers = lines[0].split(',').map(h => h.trim());
-   const data = lines.slice(1).map(line => {
-    const values = line.split(',').map(v => v.trim());
-    const player = {};
-    headers.forEach((header, i) => {
-     if (header === 'Ballhandler' || header === 'Team') {
-      player[header] = values[i];
-     } else {
-      player[header] = parseFloat(values[i]);
-     }
-    });
-    return player;
-   });
-   return data;
-  }
+  <script>
+    let playerChart = null;
+    let comparisonChart = null;
+    let allPlayerData = []; // Store the full dataset
+    let teamData = []; // Store the team data
+    let teamSortColumn = 'PTS Created';
+    let teamSortDirection = 'desc';
+    let playerSortColumn = 'PTS Created';
+    let playerSortDirection = 'desc';
+    
+    const csvFilePath = 'Advantages Created.csv';
+    const teamCsvFilePath = 'Team Advantages Created.csv';
 
-  // Function to populate all player dropdowns
-  function populateAllPlayerDropdowns(data) {
-   const playerSelect = document.getElementById('player-select');
-   const player1Select = document.getElementById('player-1-select');
-   const player2Select = document.getElementById('player-2-select');
-  
-   // Clear existing options except the first one
-   [playerSelect, player1Select, player2Select].forEach(select => {
-    while (select.options.length > 1) {
-     select.remove(1);
+    // Function to parse the CSV data
+    function parseCSV(csv) {
+      const lines = csv.trim().split('\n');
+      const headers = lines[0].split(',').map(h => h.trim());
+      const data = lines.slice(1).map(line => {
+        const values = line.split(',').map(v => v.trim());
+        const player = {};
+        headers.forEach((header, i) => {
+          if (header === 'Ballhandler' || header === 'Team') {
+            player[header] = values[i];
+          } else {
+            player[header] = parseFloat(values[i]);
+          }
+        });
+        return player;
+      });
+      return data;
     }
-   });
 
-   const sortedPlayers = [...data].sort((a, b) => {
-    return a.Ballhandler.localeCompare(b.Ballhandler);
-   });
-
-   sortedPlayers.forEach(player => {
-    const option1 = document.createElement('option');
-    option1.value = player.Ballhandler;
-    option1.textContent = player.Ballhandler;
-    playerSelect.appendChild(option1);
-
-    const option2 = document.createElement('option');
-    option2.value = player.Ballhandler;
-    option2.textContent = player.Ballhandler;
-    player1Select.appendChild(option2);
-
-    const option3 = document.createElement('option');
-    option3.value = player.Ballhandler;
-    option3.textContent = player.Ballhandler;
-    player2Select.appendChild(option3);
-   });
-  }
-
-  // Function to populate the team dropdowns
-  function populateTeamDropdowns(data) {
-   const teamSelect = document.getElementById('team-select');
-   const teamPlayerSelect = document.getElementById('team-player-select');
-   const teams = [...new Set(data.map(player => player.Team))];
-   teams.sort();
-
-   teams.forEach(team => {
-    const option1 = document.createElement('option');
-    option1.value = team;
-    option1.textContent = team;
-    teamSelect.appendChild(option1);
-
-    const option2 = document.createElement('option');
-    option2.value = team;
-    option2.textContent = team;
-    teamPlayerSelect.appendChild(option2);
-   });
-  }
- 
-  // Function to update the chart with a single player's data
-  function updatePlayerChart(playerData) {
-   const chartCanvas = document.getElementById('player-chart');
-   const metricCategories = [
-    'Self-Creation', 'Create for Others',
-    'Basket Cuts', 'Movement Shooting', 'OREB',
-    'Ball Control', 'Drawing Doubles', 'DEF PTS Saved'
-   ];
-  
-   if (playerChart) {
-    playerChart.destroy();
-   }
-
-   const metricData = playerData ? metricCategories.map(cat => playerData[cat]) : [];
-   const titleText = playerData ? `${playerData.Ballhandler}'s Advantage Points Creation` : 'Please select a player';
-
-   playerChart = new Chart(chartCanvas, {
-    type: 'bar',
-    data: {
-     labels: metricCategories,
-     datasets: [{
-      label: 'Advantage Points Created',
-      data: metricData,
-      backgroundColor: [
-       'rgba(111, 38, 61, 0.8)', // Wine
-       'rgba(255, 199, 44, 0.8)', // Gold
-       'rgba(111, 38, 61, 0.8)', // Wine
-       'rgba(255, 199, 44, 0.8)', // Gold
-       'rgba(111, 38, 61, 0.8)', // Wine
-       'rgba(255, 199, 44, 0.8)', // Gold
-       'rgba(111, 38, 61, 0.8)', // Wine
-       'rgba(0, 0, 0, 0.8)', // Black for Defensive
-      ],
-      borderColor: '#000000', // Black
-      borderWidth: 1,
-      borderRadius: 6,
-      barPercentage: 0.8,
-      categoryPercentage: 0.9
-     }]
-    },
-    options: {
-     responsive: true,
-     maintainAspectRatio: false,
-     scales: {
-      y: {
-       beginAtZero: true,
-       title: {
-        display: true,
-        text: 'Points Created',
-        color: '#000000'
-       },
-       grid: {
-        color: 'rgba(0, 0, 0, 0.1)'
-       },
-       ticks: {
-        color: '#000000'
-       }
-      },
-      x: {
-       grid: {
-        display: false
-       },
-       ticks: {
-        color: '#000000'
-       }
-      }
-     },
-     plugins: {
-      legend: {
-       display: false,
-      },
-      title: {
-       display: true,
-       text: titleText,
-       font: {
-        size: 18,
-        weight: 'bold'
-       },
-       color: '#000000'
-      },
-      tooltip: {
-       callbacks: {
-        title: (tooltipItems) => {
-         const category = tooltipItems[0].label;
-         const value = parseFloat(tooltipItems[0].raw).toFixed(1);
-         return `${category}: ${value} Pts`;
-        },
-        label: () => null,
-       }
-      }
-     }
-    }
-   });
-  }
- 
-  // New function to update the comparison chart
-  function updateComparisonChart(player1Data, player2Data) {
-   const chartCanvas = document.getElementById('comparison-chart');
-   const metricCategories = [
-    'Self-Creation', 'Create for Others',
-    'Basket Cuts', 'Movement Shooting', 'OREB',
-    'Ball Control', 'Drawing Doubles', 'DEF PTS Saved', 'PTS Created'
-   ];
-  
-   if (comparisonChart) {
-    comparisonChart.destroy();
-   }
-
-   const datasets = [];
-   const titleText = "Player Comparison";
-
-   if (player1Data) {
-    datasets.push({
-     label: player1Data.Ballhandler,
-     data: metricCategories.map(cat => player1Data[cat]),
-     backgroundColor: [
-      'rgba(111, 38, 61, 0.8)', // Wine
-      'rgba(111, 38, 61, 0.8)', // Wine
-      'rgba(111, 38, 61, 0.8)', // Wine
-      'rgba(111, 38, 61, 0.8)', // Wine
-      'rgba(111, 38, 61, 0.8)', // Wine
-      'rgba(111, 38, 61, 0.8)', // Wine
-      'rgba(111, 38, 61, 0.8)', // Wine
-      'rgba(0, 0, 0, 0.8)', // Black for Defensive
-      'rgba(0, 0, 0, 0.8)' // Black for Overall
-     ],
-     borderColor: '#000000',
-     borderWidth: 1,
-     borderRadius: 6,
-     barPercentage: 0.8,
-     categoryPercentage: 0.6
-    });
-   }
-
-   if (player2Data) {
-    datasets.push({
-     label: player2Data.Ballhandler,
-     data: metricCategories.map(cat => player2Data[cat]),
-     backgroundColor: [
-      'rgba(255, 199, 44, 0.8)', // Gold
-      'rgba(255, 199, 44, 0.8)', // Gold
-      'rgba(255, 199, 44, 0.8)', // Gold
-      'rgba(255, 199, 44, 0.8)', // Gold
-      'rgba(255, 199, 44, 0.8)', // Gold
-      'rgba(255, 199, 44, 0.8)', // Gold
-      'rgba(255, 199, 44, 0.8)', // Gold
-      'rgba(0, 0, 0, 0.8)', // Black for Defensive
-      'rgba(0, 0, 0, 0.8)' // Black for Overall
-     ],
-     borderColor: '#000000',
-     borderWidth: 1,
-     borderRadius: 6,
-     barPercentage: 0.8,
-     categoryPercentage: 0.6
-    });
-   }
-
-   comparisonChart = new Chart(chartCanvas, {
-    type: 'bar',
-    data: {
-     labels: metricCategories,
-     datasets: datasets
-    },
-    options: {
-     responsive: true,
-     maintainAspectRatio: false,
-     scales: {
-      y: {
-       beginAtZero: true,
-       title: {
-        display: true,
-        text: 'Points Created',
-        color: '#000000'
-       },
-       grid: {
-        color: 'rgba(0, 0, 0, 0.1)'
-       },
-       ticks: {
-        color: '#000000'
-       }
-      },
-      x: {
-       grid: {
-        display: false
-       },
-       ticks: {
-        color: '#000000'
-       }
-      }
-     },
-     plugins: {
-      legend: {
-       display: true,
-       position: 'top',
-       labels: {
-        color: '#000000'
-       }
-      },
-      title: {
-       display: true,
-       text: titleText,
-       font: {
-        size: 18,
-        weight: 'bold'
-       },
-       color: '#000000'
-      },
-      tooltip: {
-       callbacks: {
-        title: (tooltipItems) => {
-         const category = tooltipItems[0].label;
-         return category;
-        },
-        label: (context) => {
-         const label = context.dataset.label || '';
-         const value = parseFloat(context.raw).toFixed(1);
-         return `${label}: ${value} Pts`;
+    // Function to populate all player dropdowns
+    function populateAllPlayerDropdowns(data) {
+      const playerSelect = document.getElementById('player-select');
+      const player1Select = document.getElementById('player-1-select');
+      const player2Select = document.getElementById('player-2-select');
+      
+      // Clear existing options except the first one
+      [playerSelect, player1Select, player2Select].forEach(select => {
+        while (select.options.length > 1) {
+          select.remove(1);
         }
-       }
+      });
+
+      const sortedPlayers = [...data].sort((a, b) => {
+        return a.Ballhandler.localeCompare(b.Ballhandler);
+      });
+
+      sortedPlayers.forEach(player => {
+        const option1 = document.createElement('option');
+        option1.value = player.Ballhandler;
+        option1.textContent = player.Ballhandler;
+        playerSelect.appendChild(option1);
+
+        const option2 = document.createElement('option');
+        option2.value = player.Ballhandler;
+        option2.textContent = player.Ballhandler;
+        player1Select.appendChild(option2);
+
+        const option3 = document.createElement('option');
+        option3.value = player.Ballhandler;
+        option3.textContent = player.Ballhandler;
+        player2Select.appendChild(option3);
+      });
+    }
+
+    // Function to populate the team dropdowns
+    function populateTeamDropdowns(data) {
+      const teamSelect = document.getElementById('team-select');
+      const teamPlayerSelect = document.getElementById('team-player-select');
+      const teams = [...new Set(data.map(player => player.Team))];
+      teams.sort();
+
+      teams.forEach(team => {
+        const option1 = document.createElement('option');
+        option1.value = team;
+        option1.textContent = team;
+        teamSelect.appendChild(option1);
+
+        const option2 = document.createElement('option');
+        option2.value = team;
+        option2.textContent = team;
+        teamPlayerSelect.appendChild(option2);
+      });
+    }
+    
+    // Function to update the chart with a single player's data
+    function updatePlayerChart(playerData) {
+      const chartCanvas = document.getElementById('player-chart');
+      const metricCategories = [
+        'Self-Creation', 'Create for Others',
+        'Basket Cuts', 'Movement Shooting', 'OREB',
+        'Ball Control', 'Drawing Doubles', 'DEF PTS Saved'
+      ];
+      
+      if (playerChart) {
+        playerChart.destroy();
       }
-     }
+
+      const metricData = playerData ? metricCategories.map(cat => playerData[cat]) : [];
+      const titleText = playerData ? `${playerData.Ballhandler}'s Advantage Points Creation` : 'Please select a player';
+
+      playerChart = new Chart(chartCanvas, {
+        type: 'bar',
+        data: {
+          labels: metricCategories,
+          datasets: [{
+            label: 'Advantage Points Created',
+            data: metricData,
+            backgroundColor: [
+              'rgba(111, 38, 61, 0.8)', // Wine
+              'rgba(255, 199, 44, 0.8)', // Gold
+              'rgba(111, 38, 61, 0.8)', // Wine
+              'rgba(255, 199, 44, 0.8)', // Gold
+              'rgba(111, 38, 61, 0.8)', // Wine
+              'rgba(255, 199, 44, 0.8)', // Gold
+              'rgba(111, 38, 61, 0.8)', // Wine
+              'rgba(0, 0, 0, 0.8)', // Black for Defensive
+            ],
+            borderColor: '#000000', // Black
+            borderWidth: 1,
+            borderRadius: 6,
+            barPercentage: 0.8,
+            categoryPercentage: 0.9
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: {
+              beginAtZero: true,
+              title: {
+                display: true,
+                text: 'Points Created',
+                color: '#000000'
+              },
+              grid: {
+                color: 'rgba(0, 0, 0, 0.1)'
+              },
+              ticks: {
+                color: '#000000'
+              }
+            },
+            x: {
+              grid: {
+                display: false
+              },
+              ticks: {
+                color: '#000000'
+              }
+            }
+          },
+          plugins: {
+            legend: {
+              display: false,
+            },
+            title: {
+              display: true,
+              text: titleText,
+              font: {
+                size: 18,
+                weight: 'bold'
+              },
+              color: '#000000'
+            },
+            tooltip: {
+              callbacks: {
+                title: (tooltipItems) => {
+                  const category = tooltipItems[0].label;
+                  const value = parseFloat(tooltipItems[0].raw).toFixed(1);
+                  return `${category}: ${value} Pts`;
+                },
+                label: () => null,
+              }
+            }
+          }
+        }
+      });
     }
-   });
-  }
-
-  // New function to generate the player list HTML for a selected team
-  function displayPlayersByTeam(selectedTeam) {
-   const container = document.getElementById('player-list-container');
-   if (!selectedTeam) {
-    container.innerHTML = '<p class="text-center text-gray-500">Please select a team to see the player list.</p>';
-    return;
-   }
-
-   const teamPlayers = allPlayerData.filter(p => p.Team === selectedTeam);
-  
-   // Get all metric categories
-   const metricCategories = [
-    'Self-Creation', 'Create for Others',
-    'Basket Cuts', 'Movement Shooting', 'OREB',
-    'Ball Control', 'Drawing Doubles', 'DEF PTS Saved', 'PTS Created'
-   ];
-
-   // Calculate team averages for each metric
-   const teamAverages = {};
-   metricCategories.forEach(cat => {
-    const total = teamPlayers.reduce((sum, p) => sum + p[cat], 0);
-    teamAverages[cat] = total / teamPlayers.length;
-   });
-  
-   // Sort players by total 'Advantage PTS Created' in descending order
-   teamPlayers.sort((a, b) => b['PTS Created'] - a['PTS Created']);
-
-   let html = `<h3 class="text-xl font-semibold mb-4 text-center">Players for ${selectedTeam}</h3>`;
-   html += `<ul class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">`;
-  
-   teamPlayers.forEach(player => {
-    html += `<li class="p-4 bg-white rounded-lg shadow-md">
-     <p class="text-xl font-bold mb-2">${player.Ballhandler}</p>
-     <p class="text-sm text-gray-600 mb-2">Total PTS Created: <span class="font-bold text-lg">${player['PTS Created'].toFixed(1)}</span></p>
-     <ul class="text-sm space-y-1">`;
-   
-    metricCategories.forEach(cat => {
-     const value = player[cat];
-     const average = teamAverages[cat];
-     let rankClass = '';
-     if (value > average * 1.2) { // 20% above average
-      rankClass = 'rank-high';
-     } else if (value < average * 0.8 && value > 0) { // 20% below average
-      rankClass = 'rank-low';
-     }
     
-     html += `<li class="flex justify-between">
-      <span>${cat}:</span>
-      <span class="${rankClass}">${value.toFixed(1)}</span>
-     </li>`;
-    });
-   
-    html += `</ul></li>`;
-   });
-  
-   html += `</ul>`;
-   container.innerHTML = html;
-  }
-  
-  // Function to sort the team data
-  function sortTeamData(data, column, direction) {
-   return data.sort((a, b) => {
-    const valA = a[column];
-    const valB = b[column];
-    if (typeof valA === 'number') {
-     return direction === 'asc' ? valA - valB : valB - valA;
-    } else {
-     // For string sorting (e.g., 'Team' column)
-     if (direction === 'asc') {
-      return valA.localeCompare(valB);
-     } else {
-      return valB.localeCompare(valA);
-     }
-    }
-   });
-  }
-
-  // New function to render the team data table
-  function renderTeamTable(data, sortColumn, sortDirection) {
-   const container = document.getElementById('team-table-container');
-   container.innerHTML = ''; // Clear the container
-
-   const sortedData = sortTeamData([...data], sortColumn, sortDirection);
-
-   const table = document.createElement('table');
-   table.className = 'team-table';
-
-   const thead = document.createElement('thead');
-   const headerRow = document.createElement('tr');
-  
-   const headers = Object.keys(sortedData[0]).filter(header => !header.endsWith(' Rk'));
-  
-   headers.forEach(headerText => {
-    const th = document.createElement('th');
-    th.textContent = headerText;
-    th.className = 'sortable';
-    th.dataset.sortKey = headerText;
-
-    if (headerText === sortColumn) {
-     th.classList.add(sortDirection);
-    }
-    headerRow.appendChild(th);
-   });
-   thead.appendChild(headerRow);
-   table.appendChild(thead);
-
-   const tbody = document.createElement('tbody');
-   sortedData.forEach(team => {
-    const tr = document.createElement('tr');
-    headers.forEach(header => {
-     const td = document.createElement('td');
-     let displayValue;
-     let rankClass = '';
-    
-     if (header === 'Team') {
-      displayValue = team[header];
-     } else {
-      const value = team[header];
-      const rankHeader = `${header} Rk`;
-      const rank = team[rankHeader];
-     
-      displayValue = `${value.toFixed(1)} (${rank})`;
-     
-      // Check if a rank column exists for this metric
-      if (rank <= 5) {
-       rankClass = 'rank-high';
-      } else if (rank >= 25) { // Assuming 30 teams
-       rankClass = 'rank-low';
+    // New function to update the comparison chart
+    function updateComparisonChart(player1Data, player2Data) {
+      const chartCanvas = document.getElementById('comparison-chart');
+      const metricCategories = [
+        'Self-Creation', 'Create for Others',
+        'Basket Cuts', 'Movement Shooting', 'OREB',
+        'Ball Control', 'Drawing Doubles', 'DEF PTS Saved', 'PTS Created'
+      ];
+      
+      if (comparisonChart) {
+        comparisonChart.destroy();
       }
-     }
-    
-     td.textContent = displayValue;
-     td.className = rankClass;
-     tr.appendChild(td);
-    });
-    tbody.appendChild(tr);
-   });
-   table.appendChild(tbody);
-   container.appendChild(table);
 
-   // Add event listeners to the new headers
-   document.querySelectorAll('.team-table th.sortable').forEach(header => {
-    header.addEventListener('click', (e) => {
-     const clickedColumn = e.target.dataset.sortKey;
-     let newDirection = 'asc';
-     if (clickedColumn === currentSortColumn) {
-      newDirection = currentSortDirection === 'asc' ? 'desc' : 'asc';
-     }
-     currentSortColumn = clickedColumn;
-     currentSortDirection = newDirection;
-     renderTeamTable(teamData, currentSortColumn, currentSortDirection);
-    });
-   });
-  }
+      const datasets = [];
+      const titleText = "Player Comparison";
 
-  // Event listeners
-  document.addEventListener('DOMContentLoaded', () => {
-   // Fetch and process player data
-   fetch(csvFilePath)
-    .then(response => {
-     if (!response.ok) {
-      throw new Error('Network response was not ok');
-     }
-     return response.text();
-    })
-    .then(csvData => {
-     allPlayerData = parseCSV(csvData);
-     populateTeamDropdowns(allPlayerData);
-     populateAllPlayerDropdowns(allPlayerData);
-     updatePlayerChart(null);
-     updateComparisonChart(null, null);
-    })
-    .catch(error => console.error('Error fetching the player CSV file:', error));
+      if (player1Data) {
+        datasets.push({
+          label: player1Data.Ballhandler,
+          data: metricCategories.map(cat => player1Data[cat]),
+          backgroundColor: [
+            'rgba(111, 38, 61, 0.8)', // Wine
+            'rgba(111, 38, 61, 0.8)', // Wine
+            'rgba(111, 38, 61, 0.8)', // Wine
+            'rgba(111, 38, 61, 0.8)', // Wine
+            'rgba(111, 38, 61, 0.8)', // Wine
+            'rgba(111, 38, 61, 0.8)', // Wine
+            'rgba(111, 38, 61, 0.8)', // Wine
+            'rgba(0, 0, 0, 0.8)', // Black for Defensive
+            'rgba(0, 0, 0, 0.8)' // Black for Overall
+          ],
+          borderColor: '#000000',
+          borderWidth: 1,
+          borderRadius: 6,
+          barPercentage: 0.8,
+          categoryPercentage: 0.6
+        });
+      }
 
-   // Fetch and process team data
-   fetch(teamCsvFilePath)
-    .then(response => {
-     if (!response.ok) {
-      throw new Error('Network response was not ok');
-     }
-     return response.text();
-    })
-    .then(csvData => {
-     teamData = parseCSV(csvData);
-     renderTeamTable(teamData, currentSortColumn, currentSortDirection);
-    })
-    .catch(error => console.error('Error fetching the team CSV file:', error));
+      if (player2Data) {
+        datasets.push({
+          label: player2Data.Ballhandler,
+          data: metricCategories.map(cat => player2Data[cat]),
+          backgroundColor: [
+            'rgba(255, 199, 44, 0.8)', // Gold
+            'rgba(255, 199, 44, 0.8)', // Gold
+            'rgba(255, 199, 44, 0.8)', // Gold
+            'rgba(255, 199, 44, 0.8)', // Gold
+            'rgba(255, 199, 44, 0.8)', // Gold
+            'rgba(255, 199, 44, 0.8)', // Gold
+            'rgba(255, 199, 44, 0.8)', // Gold
+            'rgba(0, 0, 0, 0.8)', // Black for Defensive
+            'rgba(0, 0, 0, 0.8)' // Black for Overall
+          ],
+          borderColor: '#000000',
+          borderWidth: 1,
+          borderRadius: 6,
+          barPercentage: 0.8,
+          categoryPercentage: 0.6
+        });
+      }
 
-   const teamSelect = document.getElementById('team-select');
-   teamSelect.addEventListener('change', (event) => {
-    const selectedTeam = event.target.value;
-    const playerSelect = document.getElementById('player-select');
-    while (playerSelect.options.length > 1) {
-     playerSelect.remove(1);
+      comparisonChart = new Chart(chartCanvas, {
+        type: 'bar',
+        data: {
+          labels: metricCategories,
+          datasets: datasets
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: {
+              beginAtZero: true,
+              title: {
+                display: true,
+                text: 'Points Created',
+                color: '#000000'
+              },
+              grid: {
+                color: 'rgba(0, 0, 0, 0.1)'
+              },
+              ticks: {
+                color: '#000000'
+              }
+            },
+            x: {
+              grid: {
+                display: false
+              },
+              ticks: {
+                color: '#000000'
+              }
+            }
+          },
+          plugins: {
+            legend: {
+              display: true,
+              position: 'top',
+              labels: {
+                color: '#000000'
+              }
+            },
+            title: {
+              display: true,
+              text: titleText,
+              font: {
+                size: 18,
+                weight: 'bold'
+              },
+              color: '#000000'
+            },
+            tooltip: {
+              callbacks: {
+                title: (tooltipItems) => {
+                  const category = tooltipItems[0].label;
+                  return category;
+                },
+                label: (context) => {
+                  const label = context.dataset.label || '';
+                  const value = parseFloat(context.raw).toFixed(1);
+                  return `${label}: ${value} Pts`;
+                }
+              }
+            }
+          }
+        }
+      });
     }
-    const filteredPlayers = selectedTeam
-     ? allPlayerData.filter(p => p.Team === selectedTeam)
-     : allPlayerData;
-    filteredPlayers.sort((a, b) => a.Ballhandler.localeCompare(b.Ballhandler));
-    filteredPlayers.forEach(player => {
-     const option = document.createElement('option');
-     option.value = player.Ballhandler;
-     option.textContent = player.Ballhandler;
-     playerSelect.appendChild(option);
+
+    // New function to generate the player list HTML for a selected team
+    function displayPlayersByTeam(selectedTeam) {
+      const container = document.getElementById('player-list-container');
+      if (!selectedTeam) {
+        container.innerHTML = '<p class="text-center text-gray-500">Please select a team to see the player list.</p>';
+        return;
+      }
+
+      const teamPlayers = allPlayerData.filter(p => p.Team === selectedTeam);
+      
+      // Get all metric categories
+      const metricCategories = [
+        'Self-Creation', 'Create for Others',
+        'Basket Cuts', 'Movement Shooting', 'OREB',
+        'Ball Control', 'Drawing Doubles', 'DEF PTS Saved', 'PTS Created'
+      ];
+
+      // Calculate team averages for each metric
+      const teamAverages = {};
+      metricCategories.forEach(cat => {
+        const total = teamPlayers.reduce((sum, p) => sum + p[cat], 0);
+        teamAverages[cat] = total / teamPlayers.length;
+      });
+      
+      // Sort players by total 'Advantage PTS Created' in descending order
+      teamPlayers.sort((a, b) => b['PTS Created'] - a['PTS Created']);
+
+      let html = `<h3 class="text-xl font-semibold mb-4 text-center">Players for ${selectedTeam}</h3>`;
+      html += `<ul class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">`;
+      
+      teamPlayers.forEach(player => {
+        html += `<li class="p-4 bg-white rounded-lg shadow-md">
+          <p class="text-xl font-bold mb-2">${player.Ballhandler}</p>
+          <p class="text-sm text-gray-600 mb-2">Total PTS Created: <span class="font-bold text-lg">${player['PTS Created'].toFixed(1)}</span></p>
+          <ul class="text-sm space-y-1">`;
+        
+        metricCategories.forEach(cat => {
+          const value = player[cat];
+          const average = teamAverages[cat];
+          let rankClass = '';
+          if (value > average * 1.2) { // 20% above average
+            rankClass = 'rank-high';
+          } else if (value < average * 0.8 && value > 0) { // 20% below average
+            rankClass = 'rank-low';
+          }
+          
+          html += `<li class="flex justify-between">
+            <span>${cat}:</span>
+            <span class="${rankClass}">${value.toFixed(1)}</span>
+          </li>`;
+        });
+        
+        html += `</ul></li>`;
+      });
+      
+      html += `</ul>`;
+      container.innerHTML = html;
+    }
+    
+    // Function to sort the data for a given table
+    function sortTableData(data, column, direction) {
+      return data.sort((a, b) => {
+        const valA = a[column];
+        const valB = b[column];
+        if (typeof valA === 'number') {
+          return direction === 'asc' ? valA - valB : valB - valA;
+        } else {
+          if (direction === 'asc') {
+            return valA.localeCompare(valB);
+          } else {
+            return valB.localeCompare(valA);
+          }
+        }
+      });
+    }
+
+    // Function to render the team data table
+    function renderTeamTable(data, sortColumn, sortDirection) {
+      const container = document.getElementById('team-table-container');
+      container.innerHTML = ''; // Clear the container
+
+      const sortedData = sortTableData([...data], sortColumn, sortDirection);
+
+      const table = document.createElement('table');
+      table.className = 'team-table';
+
+      const thead = document.createElement('thead');
+      const headerRow = document.createElement('tr');
+      
+      const headers = Object.keys(sortedData[0]).filter(header => !header.endsWith(' Rk'));
+      
+      headers.forEach(headerText => {
+        const th = document.createElement('th');
+        th.textContent = headerText;
+        th.dataset.sortKey = headerText;
+
+        if (headerText === 'Team') {
+            th.className = '';
+        } else {
+            th.className = 'sortable';
+        }
+
+        if (headerText === sortColumn) {
+          th.classList.add(sortDirection);
+        }
+        headerRow.appendChild(th);
+      });
+      thead.appendChild(headerRow);
+      table.appendChild(thead);
+
+      const tbody = document.createElement('tbody');
+      sortedData.forEach(team => {
+        const tr = document.createElement('tr');
+        headers.forEach(header => {
+          const td = document.createElement('td');
+          let displayValue;
+          let rankClass = '';
+          
+          if (header === 'Team') {
+            displayValue = team[header];
+          } else {
+            const value = team[header];
+            const rankHeader = `${header} Rk`;
+            const rank = team[rankHeader];
+            
+            displayValue = `${value.toFixed(1)} (${rank})`;
+            
+            // Check if a rank column exists for this metric
+            if (rank <= 5) {
+              rankClass = 'rank-high';
+            } else if (rank >= 25) { // Assuming 30 teams
+              rankClass = 'rank-low';
+            }
+          }
+          
+          td.textContent = displayValue;
+          td.className = rankClass;
+          tr.appendChild(td);
+        });
+        tbody.appendChild(tr);
+      });
+      table.appendChild(tbody);
+      container.appendChild(table);
+
+      // Add event listeners to the new headers
+      document.querySelectorAll('.team-table th.sortable').forEach(header => {
+        header.addEventListener('click', (e) => {
+          const clickedColumn = e.target.dataset.sortKey;
+          let newDirection = 'asc';
+          if (clickedColumn === teamSortColumn) {
+            newDirection = teamSortDirection === 'asc' ? 'desc' : 'asc';
+          }
+          teamSortColumn = clickedColumn;
+          teamSortDirection = newDirection;
+          renderTeamTable(teamData, teamSortColumn, teamSortDirection);
+        });
+      });
+    }
+
+    // New function to render the all players table
+    function renderPlayerTable(data, sortColumn, sortDirection) {
+      const container = document.getElementById('all-players-table-container');
+      container.innerHTML = ''; // Clear the container
+
+      const sortedData = sortTableData([...data], sortColumn, sortDirection);
+
+      const table = document.createElement('table');
+      table.className = 'player-table';
+
+      const thead = document.createElement('thead');
+      const headerRow = document.createElement('tr');
+      
+      const headers = Object.keys(sortedData[0]).filter(header => !header.endsWith(' Rk'));
+      
+      headers.forEach(headerText => {
+        const th = document.createElement('th');
+        th.textContent = headerText;
+        th.dataset.sortKey = headerText;
+
+        if (headerText === 'Ballhandler' || headerText === 'Team') {
+          th.className = '';
+        } else {
+          th.className = 'sortable';
+        }
+
+        if (headerText === sortColumn) {
+          th.classList.add(sortDirection);
+        }
+        headerRow.appendChild(th);
+      });
+      thead.appendChild(headerRow);
+      table.appendChild(thead);
+
+      const tbody = document.createElement('tbody');
+      sortedData.forEach(player => {
+        const tr = document.createElement('tr');
+        headers.forEach(header => {
+          const td = document.createElement('td');
+          
+          if (header === 'Ballhandler' || header === 'Team') {
+            td.textContent = player[header];
+          } else {
+            td.textContent = player[header].toFixed(1);
+          }
+          tr.appendChild(td);
+        });
+        tbody.appendChild(tr);
+      });
+      table.appendChild(tbody);
+      container.appendChild(table);
+
+      // Add event listeners to the new headers
+      document.querySelectorAll('.player-table th.sortable').forEach(header => {
+        header.addEventListener('click', (e) => {
+          const clickedColumn = e.target.dataset.sortKey;
+          let newDirection = 'asc';
+          if (clickedColumn === playerSortColumn) {
+            newDirection = playerSortDirection === 'asc' ? 'desc' : 'asc';
+          }
+          playerSortColumn = clickedColumn;
+          playerSortDirection = newDirection;
+          renderPlayerTable(allPlayerData, playerSortColumn, playerSortDirection);
+        });
+      });
+    }
+
+    // Event listeners
+    document.addEventListener('DOMContentLoaded', () => {
+      // Fetch and process player data
+      fetch(csvFilePath)
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          return response.text();
+        })
+        .then(csvData => {
+          allPlayerData = parseCSV(csvData);
+          populateTeamDropdowns(allPlayerData);
+          populateAllPlayerDropdowns(allPlayerData);
+          updatePlayerChart(null);
+          updateComparisonChart(null, null);
+          renderPlayerTable(allPlayerData, playerSortColumn, playerSortDirection);
+        })
+        .catch(error => console.error('Error fetching the player CSV file:', error));
+
+      // Fetch and process team data
+      fetch(teamCsvFilePath)
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          return response.text();
+        })
+        .then(csvData => {
+          teamData = parseCSV(csvData);
+          renderTeamTable(teamData, teamSortColumn, teamSortDirection);
+        })
+        .catch(error => console.error('Error fetching the team CSV file:', error));
+
+      const teamSelect = document.getElementById('team-select');
+      teamSelect.addEventListener('change', (event) => {
+        const selectedTeam = event.target.value;
+        const playerSelect = document.getElementById('player-select');
+        while (playerSelect.options.length > 1) {
+          playerSelect.remove(1);
+        }
+        const filteredPlayers = selectedTeam
+          ? allPlayerData.filter(p => p.Team === selectedTeam)
+          : allPlayerData;
+        filteredPlayers.sort((a, b) => a.Ballhandler.localeCompare(b.Ballhandler));
+        filteredPlayers.forEach(player => {
+          const option = document.createElement('option');
+          option.value = player.Ballhandler;
+          option.textContent = player.Ballhandler;
+          playerSelect.appendChild(option);
+        });
+        document.getElementById('player-select').value = "";
+        updatePlayerChart(null);
+      });
+
+      const playerSelect = document.getElementById('player-select');
+      playerSelect.addEventListener('change', (event) => {
+        const selectedPlayerName = event.target.value;
+        const selectedPlayer = allPlayerData.find(p => p.Ballhandler === selectedPlayerName);
+        updatePlayerChart(selectedPlayer);
+      });
+
+      const player1Select = document.getElementById('player-1-select');
+      const player2Select = document.getElementById('player-2-select');
+      [player1Select, player2Select].forEach(select => {
+        select.addEventListener('change', () => {
+          const player1Name = player1Select.value;
+          const player2Name = player2Select.value;
+          const player1 = player1Name ? allPlayerData.find(p => p.Ballhandler === player1Name) : null;
+          const player2 = player2Name ? allPlayerData.find(p => p.Ballhandler === player2Name) : null;
+          updateComparisonChart(player1, player2);
+        });
+      });
+
+      const teamPlayerSelect = document.getElementById('team-player-select');
+      teamPlayerSelect.addEventListener('change', (event) => {
+        const selectedTeam = event.target.value;
+        displayPlayersByTeam(selectedTeam);
+      });
     });
-    document.getElementById('player-select').value = "";
-    updatePlayerChart(null);
-   });
-
-   const playerSelect = document.getElementById('player-select');
-   playerSelect.addEventListener('change', (event) => {
-    const selectedPlayerName = event.target.value;
-    const selectedPlayer = allPlayerData.find(p => p.Ballhandler === selectedPlayerName);
-    updatePlayerChart(selectedPlayer);
-   });
-
-   const player1Select = document.getElementById('player-1-select');
-   const player2Select = document.getElementById('player-2-select');
-   [player1Select, player2Select].forEach(select => {
-    select.addEventListener('change', () => {
-     const player1Name = player1Select.value;
-     const player2Name = player2Select.value;
-     const player1 = player1Name ? allPlayerData.find(p => p.Ballhandler === player1Name) : null;
-     const player2 = player2Name ? allPlayerData.find(p => p.Ballhandler === player2Name) : null;
-     updateComparisonChart(player1, player2);
-    });
-   });
-
-   const teamPlayerSelect = document.getElementById('team-player-select');
-   teamPlayerSelect.addEventListener('change', (event) => {
-    const selectedTeam = event.target.value;
-    displayPlayersByTeam(selectedTeam);
-   });
-  });
- </script>
+  </script>
 </body>
 </html>
