@@ -93,11 +93,19 @@
         <section class="mb-16">
             <div class="card">
                 <h2 class="section-header">How Do Individual Players Create Advantages?</h2>
-                <div class="flex flex-col items-center mb-8">
-                    <label for="player-select" class="text-lg font-medium mb-2">Select a Player:</label>
-                    <select id="player-select" class="w-full md:w-64 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2" style="border-color: var(--cavs-wine); focus-ring-color: var(--cavs-gold);">
-                        <option value="">-- Choose a Player --</option>
-                    </select>
+                <div class="flex flex-col md:flex-row justify-center items-center gap-4 mb-8">
+                    <div>
+                        <label for="team-select" class="text-lg font-medium mb-2">Select a Team:</label>
+                        <select id="team-select" class="w-full md:w-48 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2" style="border-color: var(--cavs-wine); focus-ring-color: var(--cavs-gold);">
+                            <option value="">-- All Teams --</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="player-select" class="text-lg font-medium mb-2">Select a Player:</label>
+                        <select id="player-select" class="w-full md:w-48 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2" style="border-color: var(--cavs-wine); focus-ring-color: var(--cavs-gold);">
+                            <option value="">-- Choose a Player --</option>
+                        </select>
+                    </div>
                 </div>
                 <div class="h-96 md:h-[500px] w-full">
                     <canvas id="player-chart"></canvas>
@@ -109,6 +117,7 @@
 
     <script>
         let playerChart = null;
+        let allPlayerData = []; // Store the full dataset
         const csvFilePath = 'Advantages Created.csv';
 
         // Function to parse the CSV data
@@ -119,8 +128,8 @@
                 const values = line.split(',').map(v => v.trim());
                 const player = {};
                 headers.forEach((header, i) => {
-                    if (i === 0) {
-                        player['name'] = values[i];
+                    if (header === 'Ballhandler' || header === 'Team') {
+                        player[header] = values[i];
                     } else {
                         player[header] = parseFloat(values[i]);
                     }
@@ -130,38 +139,68 @@
             return data;
         }
 
-        // Function to initialize the chart with data
-        function initializeChart(parsedData) {
-            const playerSelect = document.getElementById('player-select');
-            const chartCanvas = document.getElementById('player-chart');
+        // Function to populate the team dropdown
+        function populateTeamDropdown(data) {
+            const teamSelect = document.getElementById('team-select');
+            const teams = [...new Set(data.map(player => player.Team))];
+            teams.sort();
 
-            // Sort the player data alphabetically by name
-            parsedData.sort((a, b) => {
-                return a.name.localeCompare(b.name);
+            teams.forEach(team => {
+                const option = document.createElement('option');
+                option.value = team;
+                option.textContent = team;
+                teamSelect.appendChild(option);
+            });
+        }
+
+        // Function to populate the player dropdown based on team selection
+        function populatePlayerDropdown(data, selectedTeam) {
+            const playerSelect = document.getElementById('player-select');
+            // Clear existing options except the first one
+            while (playerSelect.options.length > 1) {
+                playerSelect.remove(1);
+            }
+
+            const filteredPlayers = selectedTeam
+                ? data.filter(player => player.Team === selectedTeam)
+                : data;
+
+            // Sort the filtered player data alphabetically by name
+            filteredPlayers.sort((a, b) => {
+                return a.Ballhandler.localeCompare(b.Ballhandler);
             });
 
-            // Populate the dropdown with sorted player names
-            parsedData.forEach(player => {
+            filteredPlayers.forEach(player => {
                 const option = document.createElement('option');
-                option.value = player.name;
-                option.textContent = player.name;
+                option.value = player.Ballhandler;
+                option.textContent = player.Ballhandler;
                 playerSelect.appendChild(option);
             });
+        }
 
+        // Function to update the chart with player data
+        function updatePlayerChart(playerData) {
+            const chartCanvas = document.getElementById('player-chart');
             const metricCategories = [
                 'Self-Creation', 'Create for Others',
                 'Basket Cuts', 'Movement Shooting', 'OREB',
                 'Ball Control', 'Drawing Doubles'
             ];
+            
+            if (playerChart) {
+                playerChart.destroy();
+            }
 
-            // Initialize the chart
+            const metricData = playerData ? metricCategories.map(cat => playerData[cat]) : [];
+            const titleText = playerData ? `${playerData.Ballhandler}'s Advantage Points Creation` : 'Please select a player';
+
             playerChart = new Chart(chartCanvas, {
                 type: 'bar',
                 data: {
                     labels: metricCategories,
                     datasets: [{
                         label: 'Advantage Points Created',
-                        data: [],
+                        data: metricData,
                         backgroundColor: [
                             '#FFC72C', // True Gold
                             '#6F263D', // Wine
@@ -198,7 +237,7 @@
                         },
                         x: {
                             grid: {
-                                color: 'rgba(0, 0, 0, 0.1)'
+                                display: false
                             },
                             ticks: {
                                 color: '#000000'
@@ -211,7 +250,7 @@
                         },
                         title: {
                             display: true,
-                            text: 'Points Created by Advantage Type',
+                            text: titleText,
                             font: {
                                 size: 18,
                                 weight: 'bold'
@@ -231,32 +270,9 @@
                     }
                 }
             });
-
-            // Update the chart when a new player is selected
-            playerSelect.addEventListener('change', (event) => {
-                const selectedPlayerName = event.target.value;
-                const selectedPlayer = parsedData.find(p => p.name === selectedPlayerName);
-
-                if (selectedPlayer) {
-                    const metricData = metricCategories.map(cat => selectedPlayer[cat]);
-                    playerChart.data.datasets[0].data = metricData;
-                    playerChart.options.plugins.title.text = `${selectedPlayerName}'s Advantage Points Creation`;
-                    playerChart.update();
-                } else {
-                    playerChart.data.datasets[0].data = [];
-                    playerChart.options.plugins.title.text = 'Please select a player';
-                    playerChart.update();
-                }
-            });
-
-            // Set the default selected player to Nikola Jokic
-            if (parsedData.length > 0) {
-                playerSelect.value = "Nikola Jokic";
-                playerSelect.dispatchEvent(new Event('change'));
-            }
         }
 
-        // Fetch the CSV file and initialize the application
+        // Event listeners
         document.addEventListener('DOMContentLoaded', () => {
             fetch(csvFilePath)
                 .then(response => {
@@ -266,10 +282,27 @@
                     return response.text();
                 })
                 .then(csvData => {
-                    const parsedData = parseCSV(csvData);
-                    initializeChart(parsedData);
+                    allPlayerData = parseCSV(csvData);
+                    populateTeamDropdown(allPlayerData);
+                    populatePlayerDropdown(allPlayerData, null);
+                    updatePlayerChart(null);
                 })
                 .catch(error => console.error('Error fetching the CSV file:', error));
+
+            const teamSelect = document.getElementById('team-select');
+            teamSelect.addEventListener('change', (event) => {
+                const selectedTeam = event.target.value;
+                populatePlayerDropdown(allPlayerData, selectedTeam);
+                document.getElementById('player-select').value = ""; // Reset player dropdown
+                updatePlayerChart(null); // Clear the chart
+            });
+
+            const playerSelect = document.getElementById('player-select');
+            playerSelect.addEventListener('change', (event) => {
+                const selectedPlayerName = event.target.value;
+                const selectedPlayer = allPlayerData.find(p => p.Ballhandler === selectedPlayerName);
+                updatePlayerChart(selectedPlayer);
+            });
         });
     </script>
 </body>
