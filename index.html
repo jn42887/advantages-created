@@ -40,6 +40,39 @@
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             padding: 2rem;
         }
+        .rank-high {
+            color: green;
+            font-weight: bold;
+        }
+        .rank-low {
+            color: red;
+            font-weight: bold;
+        }
+        .team-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+            font-size: 0.8rem;
+        }
+        .team-table th, .team-table td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: center;
+        }
+        .team-table th {
+            background-color: var(--cavs-wine);
+            color: var(--cavs-white);
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        .team-table tbody tr:nth-child(even) {
+            background-color: #f1f1f1;
+        }
+        .team-table tbody tr:hover {
+            background-color: #e0e0e0;
+        }
     </style>
 </head>
 <body class="bg-gray-100 text-gray-800">
@@ -113,12 +146,36 @@
             </div>
         </section>
 
+        <section class="mb-16">
+            <div class="card">
+                <h2 class="section-header">Players by Team</h2>
+                <div class="flex flex-col md:flex-row justify-center items-center gap-4 mb-8">
+                    <label for="team-player-select" class="text-lg font-medium">Select a Team:</label>
+                    <select id="team-player-select" class="w-full md:w-48 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2" style="border-color: var(--cavs-wine); focus-ring-color: var(--cavs-gold);">
+                        <option value="">-- Select a Team --</option>
+                    </select>
+                </div>
+                <div id="player-list-container" class="mt-8">
+                    <p class="text-center text-gray-500">Please select a team to see the player list.</p>
+                </div>
+            </div>
+        </section>
+        
+        <section>
+            <div class="card">
+                <h2 class="section-header">Team Advantages Metrics & Ranks</h2>
+                <div id="team-table-container" class="overflow-x-auto">
+                    </div>
+            </div>
+        </section>
+
     </div>
 
     <script>
         let playerChart = null;
         let allPlayerData = []; // Store the full dataset
         const csvFilePath = 'Advantages Created.csv';
+        const teamCsvFilePath = 'Team Advantages Created.csv';
 
         // Function to parse the CSV data
         function parseCSV(csv) {
@@ -139,17 +196,23 @@
             return data;
         }
 
-        // Function to populate the team dropdown
-        function populateTeamDropdown(data) {
+        // Function to populate the team dropdowns
+        function populateTeamDropdowns(data) {
             const teamSelect = document.getElementById('team-select');
+            const teamPlayerSelect = document.getElementById('team-player-select');
             const teams = [...new Set(data.map(player => player.Team))];
             teams.sort();
 
             teams.forEach(team => {
-                const option = document.createElement('option');
-                option.value = team;
-                option.textContent = team;
-                teamSelect.appendChild(option);
+                const option1 = document.createElement('option');
+                option1.value = team;
+                option1.textContent = team;
+                teamSelect.appendChild(option1);
+
+                const option2 = document.createElement('option');
+                option2.value = team;
+                option2.textContent = team;
+                teamPlayerSelect.appendChild(option2);
             });
         }
 
@@ -272,8 +335,102 @@
             });
         }
 
+        // New function to generate the player list HTML for a selected team
+        function displayPlayersByTeam(selectedTeam) {
+            const container = document.getElementById('player-list-container');
+            if (!selectedTeam) {
+                container.innerHTML = '<p class="text-center text-gray-500">Please select a team to see the player list.</p>';
+                return;
+            }
+
+            const teamPlayers = allPlayerData.filter(p => p.Team === selectedTeam);
+            
+            // Get all metric categories
+            const metricCategories = [
+                'Self-Creation', 'Create for Others',
+                'Basket Cuts', 'Movement Shooting', 'OREB',
+                'Ball Control', 'Drawing Doubles'
+            ];
+
+            // Calculate team averages for each metric
+            const teamAverages = {};
+            metricCategories.forEach(cat => {
+                const total = teamPlayers.reduce((sum, p) => sum + p[cat], 0);
+                teamAverages[cat] = total / teamPlayers.length;
+            });
+            
+            // Sort players by total 'Advantage PTS Created' in descending order
+            teamPlayers.sort((a, b) => b['Advantage PTS Created'] - a['Advantage PTS Created']);
+
+            let html = `<h3 class="text-xl font-semibold mb-4 text-center">Players for ${selectedTeam}</h3>`;
+            html += `<ul class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">`;
+            
+            teamPlayers.forEach(player => {
+                html += `<li class="p-4 bg-white rounded-lg shadow-md">
+                    <p class="text-xl font-bold mb-2">${player.Ballhandler}</p>
+                    <p class="text-sm text-gray-600 mb-2">Total Advantage PTS Created: <span class="font-bold text-lg">${player['Advantage PTS Created']}</span></p>
+                    <ul class="text-sm space-y-1">`;
+                
+                metricCategories.forEach(cat => {
+                    const value = player[cat];
+                    const average = teamAverages[cat];
+                    let rankClass = '';
+                    if (value > average * 1.2) { // 20% above average
+                        rankClass = 'rank-high';
+                    } else if (value < average * 0.8 && value > 0) { // 20% below average
+                        rankClass = 'rank-low';
+                    }
+                    
+                    html += `<li class="flex justify-between">
+                        <span>${cat}:</span>
+                        <span class="${rankClass}">${value}</span>
+                    </li>`;
+                });
+                
+                html += `</ul></li>`;
+            });
+            
+            html += `</ul>`;
+            container.innerHTML = html;
+        }
+
+        // New function to generate the team data table
+        function createTeamTable(teamData) {
+            const container = document.getElementById('team-table-container');
+            const table = document.createElement('table');
+            table.className = 'team-table';
+
+            const thead = document.createElement('thead');
+            const headerRow = document.createElement('tr');
+
+            // Exclude 'Rk' columns from headers
+            const headers = Object.keys(teamData[0]).filter(header => !header.endsWith(' Rk'));
+            
+            headers.forEach(headerText => {
+                const th = document.createElement('th');
+                th.textContent = headerText;
+                headerRow.appendChild(th);
+            });
+            thead.appendChild(headerRow);
+            table.appendChild(thead);
+
+            const tbody = document.createElement('tbody');
+            teamData.forEach(team => {
+                const tr = document.createElement('tr');
+                headers.forEach(header => {
+                    const td = document.createElement('td');
+                    td.textContent = team[header];
+                    tr.appendChild(td);
+                });
+                tbody.appendChild(tr);
+            });
+            table.appendChild(tbody);
+            container.appendChild(table);
+        }
+
         // Event listeners
         document.addEventListener('DOMContentLoaded', () => {
+            // Fetch and process player data
             fetch(csvFilePath)
                 .then(response => {
                     if (!response.ok) {
@@ -283,11 +440,25 @@
                 })
                 .then(csvData => {
                     allPlayerData = parseCSV(csvData);
-                    populateTeamDropdown(allPlayerData);
+                    populateTeamDropdowns(allPlayerData); // Use the new function for both dropdowns
                     populatePlayerDropdown(allPlayerData, null);
                     updatePlayerChart(null);
                 })
-                .catch(error => console.error('Error fetching the CSV file:', error));
+                .catch(error => console.error('Error fetching the player CSV file:', error));
+
+            // Fetch and process team data
+            fetch(teamCsvFilePath)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.text();
+                })
+                .then(csvData => {
+                    const teamData = parseCSV(csvData);
+                    createTeamTable(teamData);
+                })
+                .catch(error => console.error('Error fetching the team CSV file:', error));
 
             const teamSelect = document.getElementById('team-select');
             teamSelect.addEventListener('change', (event) => {
@@ -302,6 +473,13 @@
                 const selectedPlayerName = event.target.value;
                 const selectedPlayer = allPlayerData.find(p => p.Ballhandler === selectedPlayerName);
                 updatePlayerChart(selectedPlayer);
+            });
+
+            // New event listener for the team player list dropdown
+            const teamPlayerSelect = document.getElementById('team-player-select');
+            teamPlayerSelect.addEventListener('change', (event) => {
+                const selectedTeam = event.target.value;
+                displayPlayersByTeam(selectedTeam);
             });
         });
     </script>
