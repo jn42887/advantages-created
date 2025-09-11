@@ -148,6 +148,29 @@
 
         <section class="mb-16">
             <div class="card">
+                <h2 class="section-header">Player Comparison Tool</h2>
+                <div class="flex flex-col md:flex-row justify-center items-center gap-4 mb-8">
+                    <div>
+                        <label for="player-1-select" class="text-lg font-medium mb-2">Select Player 1:</label>
+                        <select id="player-1-select" class="w-full md:w-48 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2" style="border-color: var(--cavs-wine); focus-ring-color: var(--cavs-gold);">
+                            <option value="">-- Choose a Player --</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="player-2-select" class="text-lg font-medium mb-2">Select Player 2:</label>
+                        <select id="player-2-select" class="w-full md:w-48 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2" style="border-color: var(--cavs-wine); focus-ring-color: var(--cavs-gold);">
+                            <option value="">-- Choose a Player --</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="h-96 md:h-[500px] w-full">
+                    <canvas id="comparison-chart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <section class="mb-16">
+            <div class="card">
                 <h2 class="section-header">Players by Team</h2>
                 <div class="flex flex-col md:flex-row justify-center items-center gap-4 mb-8">
                     <label for="team-player-select" class="text-lg font-medium">Select a Team:</label>
@@ -173,6 +196,7 @@
 
     <script>
         let playerChart = null;
+        let comparisonChart = null;
         let allPlayerData = []; // Store the full dataset
         const csvFilePath = 'Advantages Created.csv';
         const teamCsvFilePath = 'Team Advantages Created.csv';
@@ -196,6 +220,41 @@
             return data;
         }
 
+        // Function to populate all player dropdowns
+        function populateAllPlayerDropdowns(data) {
+            const playerSelect = document.getElementById('player-select');
+            const player1Select = document.getElementById('player-1-select');
+            const player2Select = document.getElementById('player-2-select');
+            
+            // Clear existing options except the first one
+            [playerSelect, player1Select, player2Select].forEach(select => {
+                while (select.options.length > 1) {
+                    select.remove(1);
+                }
+            });
+
+            const sortedPlayers = [...data].sort((a, b) => {
+                return a.Ballhandler.localeCompare(b.Ballhandler);
+            });
+
+            sortedPlayers.forEach(player => {
+                const option1 = document.createElement('option');
+                option1.value = player.Ballhandler;
+                option1.textContent = player.Ballhandler;
+                playerSelect.appendChild(option1);
+
+                const option2 = document.createElement('option');
+                option2.value = player.Ballhandler;
+                option2.textContent = player.Ballhandler;
+                player1Select.appendChild(option2);
+
+                const option3 = document.createElement('option');
+                option3.value = player.Ballhandler;
+                option3.textContent = player.Ballhandler;
+                player2Select.appendChild(option3);
+            });
+        }
+
         // Function to populate the team dropdowns
         function populateTeamDropdowns(data) {
             const teamSelect = document.getElementById('team-select');
@@ -215,33 +274,8 @@
                 teamPlayerSelect.appendChild(option2);
             });
         }
-
-        // Function to populate the player dropdown based on team selection
-        function populatePlayerDropdown(data, selectedTeam) {
-            const playerSelect = document.getElementById('player-select');
-            // Clear existing options except the first one
-            while (playerSelect.options.length > 1) {
-                playerSelect.remove(1);
-            }
-
-            const filteredPlayers = selectedTeam
-                ? data.filter(player => player.Team === selectedTeam)
-                : data;
-
-            // Sort the filtered player data alphabetically by name
-            filteredPlayers.sort((a, b) => {
-                return a.Ballhandler.localeCompare(b.Ballhandler);
-            });
-
-            filteredPlayers.forEach(player => {
-                const option = document.createElement('option');
-                option.value = player.Ballhandler;
-                option.textContent = player.Ballhandler;
-                playerSelect.appendChild(option);
-            });
-        }
-
-        // Function to update the chart with player data
+        
+        // Function to update the chart with a single player's data
         function updatePlayerChart(playerData) {
             const chartCanvas = document.getElementById('player-chart');
             const metricCategories = [
@@ -328,6 +362,116 @@
                                     return `${category}: ${value} Pts`;
                                 },
                                 label: () => null,
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // New function to update the comparison chart
+        function updateComparisonChart(player1Data, player2Data) {
+            const chartCanvas = document.getElementById('comparison-chart');
+            const metricCategories = [
+                'Self-Creation', 'Create for Others',
+                'Basket Cuts', 'Movement Shooting', 'OREB',
+                'Ball Control', 'Drawing Doubles'
+            ];
+            
+            if (comparisonChart) {
+                comparisonChart.destroy();
+            }
+
+            const datasets = [];
+            const titleText = "Player Comparison";
+
+            if (player1Data) {
+                datasets.push({
+                    label: player1Data.Ballhandler,
+                    data: metricCategories.map(cat => player1Data[cat]),
+                    backgroundColor: '#6F263D', // Cavs Wine
+                    borderColor: '#000000',
+                    borderWidth: 1,
+                    borderRadius: 6,
+                    barPercentage: 0.8,
+                    categoryPercentage: 0.6
+                });
+            }
+
+            if (player2Data) {
+                datasets.push({
+                    label: player2Data.Ballhandler,
+                    data: metricCategories.map(cat => player2Data[cat]),
+                    backgroundColor: '#FFC72C', // Cavs Gold
+                    borderColor: '#000000',
+                    borderWidth: 1,
+                    borderRadius: 6,
+                    barPercentage: 0.8,
+                    categoryPercentage: 0.6
+                });
+            }
+
+            comparisonChart = new Chart(chartCanvas, {
+                type: 'bar',
+                data: {
+                    labels: metricCategories,
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Points Created',
+                                color: '#000000'
+                            },
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.1)'
+                            },
+                            ticks: {
+                                color: '#000000'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                color: '#000000'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            labels: {
+                                color: '#000000'
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: titleText,
+                            font: {
+                                size: 18,
+                                weight: 'bold'
+                            },
+                            color: '#000000'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                title: (tooltipItems) => {
+                                    const category = tooltipItems[0].label;
+                                    return category;
+                                },
+                                label: (context) => {
+                                    const label = context.dataset.label || '';
+                                    const value = parseFloat(context.raw).toFixed(1);
+                                    return `${label}: ${value} Pts`;
+                                }
                             }
                         }
                     }
@@ -461,9 +605,10 @@
                 })
                 .then(csvData => {
                     allPlayerData = parseCSV(csvData);
-                    populateTeamDropdowns(allPlayerData); // Use the new function for both dropdowns
-                    populatePlayerDropdown(allPlayerData, null);
+                    populateTeamDropdowns(allPlayerData);
+                    populateAllPlayerDropdowns(allPlayerData);
                     updatePlayerChart(null);
+                    updateComparisonChart(null, null);
                 })
                 .catch(error => console.error('Error fetching the player CSV file:', error));
 
@@ -484,9 +629,22 @@
             const teamSelect = document.getElementById('team-select');
             teamSelect.addEventListener('change', (event) => {
                 const selectedTeam = event.target.value;
-                populatePlayerDropdown(allPlayerData, selectedTeam);
-                document.getElementById('player-select').value = ""; // Reset player dropdown
-                updatePlayerChart(null); // Clear the chart
+                const playerSelect = document.getElementById('player-select');
+                while (playerSelect.options.length > 1) {
+                    playerSelect.remove(1);
+                }
+                const filteredPlayers = selectedTeam
+                    ? allPlayerData.filter(p => p.Team === selectedTeam)
+                    : allPlayerData;
+                filteredPlayers.sort((a, b) => a.Ballhandler.localeCompare(b.Ballhandler));
+                filteredPlayers.forEach(player => {
+                    const option = document.createElement('option');
+                    option.value = player.Ballhandler;
+                    option.textContent = player.Ballhandler;
+                    playerSelect.appendChild(option);
+                });
+                document.getElementById('player-select').value = "";
+                updatePlayerChart(null);
             });
 
             const playerSelect = document.getElementById('player-select');
@@ -496,7 +654,18 @@
                 updatePlayerChart(selectedPlayer);
             });
 
-            // New event listener for the team player list dropdown
+            const player1Select = document.getElementById('player-1-select');
+            const player2Select = document.getElementById('player-2-select');
+            [player1Select, player2Select].forEach(select => {
+                select.addEventListener('change', () => {
+                    const player1Name = player1Select.value;
+                    const player2Name = player2Select.value;
+                    const player1 = player1Name ? allPlayerData.find(p => p.Ballhandler === player1Name) : null;
+                    const player2 = player2Name ? allPlayerData.find(p => p.Ballhandler === player2Name) : null;
+                    updateComparisonChart(player1, player2);
+                });
+            });
+
             const teamPlayerSelect = document.getElementById('team-player-select');
             teamPlayerSelect.addEventListener('change', (event) => {
                 const selectedTeam = event.target.value;
