@@ -402,12 +402,13 @@
 
             const thead = document.createElement('thead');
             const headerRow = document.createElement('tr');
-
-            const headers = Object.keys(teamData[0]);
+            
+            // Get the headers, but only the main metric headers (not the rank headers)
+            const headers = Object.keys(teamData[0]).filter(header => !header.endsWith(' Rk'));
             
             headers.forEach(headerText => {
                 const th = document.createElement('th');
-                th.textContent = headerText.replace(' Rk', '');
+                th.textContent = headerText;
                 headerRow.appendChild(th);
             });
             thead.appendChild(headerRow);
@@ -421,27 +422,21 @@
                     let displayValue;
                     let rankClass = '';
                     
-                    if (header.endsWith(' Rk')) {
+                    if (header === 'Team') {
                         displayValue = team[header];
-                        if (displayValue <= 5) {
+                    } else {
+                        const value = team[header];
+                        const rankHeader = `${header} Rk`;
+                        const rank = team[rankHeader];
+                        
+                        displayValue = `${value.toFixed(1)} (${rank})`;
+                        
+                        // Check if a rank column exists for this metric
+                        if (rank <= 5) {
                             rankClass = 'rank-high';
-                        } else if (displayValue >= 25) { // Assuming 30 teams
+                        } else if (rank >= 25) { // Assuming 30 teams
                             rankClass = 'rank-low';
                         }
-                    } else if (typeof team[header] === 'number') {
-                        displayValue = team[header].toFixed(1);
-                        // Check if a rank column exists for this metric
-                        const rankHeader = `${header} Rk`;
-                        if (teamData[0].hasOwnProperty(rankHeader)) {
-                            const rank = team[rankHeader];
-                            if (rank <= 5) {
-                                rankClass = 'rank-high';
-                            } else if (rank >= 25) {
-                                rankClass = 'rank-low';
-                            }
-                        }
-                    } else {
-                        displayValue = team[header];
                     }
                     
                     td.textContent = displayValue;
