@@ -218,7 +218,7 @@
 
     <section>
       <div class="card">
-        <h2 class="section-header">All Players Advantages Metrics</h2>
+        <h2 class="section-header">All Players Advantages Metrics & Ranks</h2>
         <div id="all-players-table-container" class="overflow-x-auto">
         </div>
       </div>
@@ -238,6 +238,16 @@
     
     const csvFilePath = 'Advantages Created.csv';
     const teamCsvFilePath = 'Team Advantages Created.csv';
+    
+    const numericalPlayerMetrics = [
+      'Self-Creation', 'Create for Others',
+      'Basket Cuts', 'Movement Shooting', 'OREB',
+      'Ball Control', 'Drawing Doubles', 'DEF PTS Saved', 'PTS Created'
+    ];
+    
+    const playerTableHeaders = [
+      'Ballhandler', 'Team', ...numericalPlayerMetrics
+    ];
 
     // Function to parse the CSV data
     function parseCSV(csv) {
@@ -254,6 +264,29 @@
           }
         });
         return player;
+      });
+      return data;
+    }
+
+    // Function to calculate percentile ranks for players
+    function calculatePlayerRanks(data) {
+      const rankedData = [...data];
+      const N = rankedData.length;
+
+      numericalPlayerMetrics.forEach(metric => {
+        // Sort data for this metric in descending order
+        rankedData.sort((a, b) => b[metric] - a[metric]);
+
+        let currentRank = 1;
+        for (let i = 0; i < N; i++) {
+          // Check for ties
+          if (i > 0 && rankedData[i][metric] !== rankedData[i - 1][metric]) {
+            currentRank = i + 1;
+          }
+          // Find the original player object and add the rank
+          const originalPlayer = data.find(p => p.Ballhandler === rankedData[i].Ballhandler);
+          originalPlayer[`${metric} Rk`] = currentRank;
+        }
       });
       return data;
     }
@@ -316,11 +349,7 @@
     // Function to update the chart with a single player's data
     function updatePlayerChart(playerData) {
       const chartCanvas = document.getElementById('player-chart');
-      const metricCategories = [
-        'Self-Creation', 'Create for Others',
-        'Basket Cuts', 'Movement Shooting', 'OREB',
-        'Ball Control', 'Drawing Doubles', 'DEF PTS Saved'
-      ];
+      const metricCategories = numericalPlayerMetrics;
       
       if (playerChart) {
         playerChart.destroy();
@@ -345,6 +374,7 @@
               'rgba(255, 199, 44, 0.8)', // Gold
               'rgba(111, 38, 61, 0.8)', // Wine
               'rgba(0, 0, 0, 0.8)', // Black for Defensive
+              'rgba(0, 0, 0, 0.8)' // Black for Overall
             ],
             borderColor: '#000000', // Black
             borderWidth: 1,
@@ -398,7 +428,8 @@
                 title: (tooltipItems) => {
                   const category = tooltipItems[0].label;
                   const value = parseFloat(tooltipItems[0].raw).toFixed(1);
-                  return `${category}: ${value} Pts`;
+                  const rank = playerData ? playerData[`${category} Rk`] : 'N/A';
+                  return `${category}: ${value} Pts (Rank: ${rank})`;
                 },
                 label: () => null,
               }
@@ -411,11 +442,7 @@
     // New function to update the comparison chart
     function updateComparisonChart(player1Data, player2Data) {
       const chartCanvas = document.getElementById('comparison-chart');
-      const metricCategories = [
-        'Self-Creation', 'Create for Others',
-        'Basket Cuts', 'Movement Shooting', 'OREB',
-        'Ball Control', 'Drawing Doubles', 'DEF PTS Saved', 'PTS Created'
-      ];
+      const metricCategories = numericalPlayerMetrics;
       
       if (comparisonChart) {
         comparisonChart.destroy();
@@ -529,7 +556,9 @@
                 label: (context) => {
                   const label = context.dataset.label || '';
                   const value = parseFloat(context.raw).toFixed(1);
-                  return `${label}: ${value} Pts`;
+                  const player = context.datasetIndex === 0 ? player1Data : player2Data;
+                  const rank = player ? player[`${context.label} Rk`] : 'N/A';
+                  return `${label}: ${value} Pts (Rank: ${rank})`;
                 }
               }
             }
@@ -549,11 +578,7 @@
       const teamPlayers = allPlayerData.filter(p => p.Team === selectedTeam);
       
       // Get all metric categories
-      const metricCategories = [
-        'Self-Creation', 'Create for Others',
-        'Basket Cuts', 'Movement Shooting', 'OREB',
-        'Ball Control', 'Drawing Doubles', 'DEF PTS Saved', 'PTS Created'
-      ];
+      const metricCategories = numericalPlayerMetrics;
 
       // Calculate team averages for each metric
       const teamAverages = {};
@@ -564,6 +589,8 @@
       
       // Sort players by total 'Advantage PTS Created' in descending order
       teamPlayers.sort((a, b) => b['PTS Created'] - a['PTS Created']);
+      
+      const N = allPlayerData.length;
 
       let html = `<h3 class="text-xl font-semibold mb-4 text-center">Players for ${selectedTeam}</h3>`;
       html += `<ul class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">`;
@@ -571,22 +598,23 @@
       teamPlayers.forEach(player => {
         html += `<li class="p-4 bg-white rounded-lg shadow-md">
           <p class="text-xl font-bold mb-2">${player.Ballhandler}</p>
-          <p class="text-sm text-gray-600 mb-2">Total PTS Created: <span class="font-bold text-lg">${player['PTS Created'].toFixed(1)}</span></p>
+          <p class="text-sm text-gray-600 mb-2">Overall PTS Created: <span class="font-bold text-lg">${player['PTS Created'].toFixed(1)}</span> (Rank: ${player['PTS Created Rk']})</p>
           <ul class="text-sm space-y-1">`;
         
         metricCategories.forEach(cat => {
           const value = player[cat];
-          const average = teamAverages[cat];
+          const rank = player[`${cat} Rk`];
+          
           let rankClass = '';
-          if (value > average * 1.2) { // 20% above average
+          if (rank <= Math.round(N * 0.1)) { // Top 10%
             rankClass = 'rank-high';
-          } else if (value < average * 0.8 && value > 0) { // 20% below average
+          } else if (rank >= Math.round(N * 0.9)) { // Bottom 10%
             rankClass = 'rank-low';
           }
           
           html += `<li class="flex justify-between">
             <span>${cat}:</span>
-            <span class="${rankClass}">${value.toFixed(1)}</span>
+            <span class="${rankClass}">${value.toFixed(1)} (${rank})</span>
           </li>`;
         });
         
@@ -703,6 +731,7 @@
       container.innerHTML = ''; // Clear the container
 
       const sortedData = sortTableData([...data], sortColumn, sortDirection);
+      const N = sortedData.length;
 
       const table = document.createElement('table');
       table.className = 'player-table';
@@ -710,7 +739,7 @@
       const thead = document.createElement('thead');
       const headerRow = document.createElement('tr');
       
-      const headers = Object.keys(sortedData[0]).filter(header => !header.endsWith(' Rk'));
+      const headers = playerTableHeaders;
       
       headers.forEach(headerText => {
         const th = document.createElement('th');
@@ -740,7 +769,18 @@
           if (header === 'Ballhandler' || header === 'Team') {
             td.textContent = player[header];
           } else {
-            td.textContent = player[header].toFixed(1);
+            const value = player[header];
+            const rank = player[`${header} Rk`];
+
+            let rankClass = '';
+            if (rank <= Math.round(N * 0.1)) {
+              rankClass = 'rank-high';
+            } else if (rank >= Math.round(N * 0.9)) {
+              rankClass = 'rank-low';
+            }
+            
+            td.textContent = `${value.toFixed(1)} (${rank})`;
+            td.className = rankClass;
           }
           tr.appendChild(td);
         });
@@ -776,6 +816,7 @@
         })
         .then(csvData => {
           allPlayerData = parseCSV(csvData);
+          allPlayerData = calculatePlayerRanks(allPlayerData);
           populateTeamDropdowns(allPlayerData);
           populateAllPlayerDropdowns(allPlayerData);
           updatePlayerChart(null);
